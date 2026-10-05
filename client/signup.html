@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account · PhilFIDA RO8 DV Tracking System</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary: #0f6b4a;
+    --primary-dark: #0a4d36;
+    --primary-light: #1d9467;
+    --gold: #b7791f;
+    --gold-light: #d9a441;
+    --danger: #dc2626;
+    --ink-900: #16211c;
+    --ink-700: #3d4a43;
+    --ink-500: #6b7a72;
+    --ink-400: #99a6a0;
+    --surface: #ffffff;
+    --surface-muted: #f3f8f4;
+    --border: #dfe9e2;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --shadow-lg: 0 22px 55px rgba(22, 33, 28, 0.14), 0 6px 16px rgba(22, 33, 28, 0.06);
+}
+
+* { font-family: 'Inter', sans-serif; }
+.font-poppins { font-family: 'Poppins', sans-serif; }
+
+html, body { height: 100%; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    color: var(--ink-700);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    background:
+        radial-gradient(1200px 600px at 15% -10%, rgba(29, 148, 103, 0.18), transparent 60%),
+        radial-gradient(1000px 500px at 110% 10%, rgba(183, 121, 31, 0.14), transparent 55%),
+        linear-gradient(180deg, #dfeee3 0%, #eaf3ec 22%, #f2f6f1 55%, #f6f7f3 100%);
+    background-attachment: fixed;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    animation: cardIn 0.4s cubic-bezier(.2,.8,.3,1);
+}
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.login-banner {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 55%, var(--primary-light) 100%);
+    border-bottom: 3px solid var(--gold);
+    position: relative;
+    padding: 32px 32px 24px;
+    text-align: center;
+}
+
+.login-banner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+}
+
+.login-badge {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 12px;
+    border-radius: 16px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: var(--primary);
+    box-shadow: 0 6px 18px rgba(10, 77, 54, 0.25);
+}
+
+.login-body { padding: 32px; }
+
+.field-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-700);
+    margin-bottom: 6px;
+    display: block;
+}
+
+.input-field {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    transition: all 0.18s ease;
+    background: var(--surface-muted);
+    color: var(--ink-900);
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(15, 107, 74, 0.12);
+}
+
+.password-wrap { position: relative; }
+.password-toggle {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-400);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+}
+.password-toggle:hover { color: var(--ink-700); }
+
+/* Role picker — two big tappable cards instead of a plain <select>,
+   so the Admin/User distinction reads as a real decision, not an
+   afterthought buried in a dropdown. */
+.role-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.role-option { position: relative; }
+.role-option input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+}
+
+.role-card {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    background: var(--surface-muted);
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.role-card i { font-size: 16px; color: var(--ink-500); }
+.role-card .role-name { font-size: 13.5px; font-weight: 600; color: var(--ink-700); }
+.role-card .role-desc { font-size: 11.5px; color: var(--ink-500); }
+
+.role-option input:checked + .role-card {
+    border-color: var(--primary);
+    background: var(--accent-soft, #e7f5ed);
+    box-shadow: 0 0 0 3px rgba(15, 107, 74, 0.1);
+}
+.role-option input:checked + .role-card i,
+.role-option input:checked + .role-card .role-name { color: var(--primary-dark); }
+.role-option input:focus-visible + .role-card { outline: 2px solid var(--primary-light); outline-offset: 2px; }
+
+.btn-signin {
+    width: 100%;
+    padding: 13px 22px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 14.5px;
+    border: none;
+    color: white;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    transition: all 0.18s cubic-bezier(.2,.7,.3,1);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.btn-signin:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(22, 33, 28, 0.16); filter: brightness(1.03); }
+.btn-signin:active { transform: translateY(0) scale(0.98); }
+
+.error-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    border-radius: var(--radius-md);
+    padding: 11px 14px;
+    font-size: 13.5px;
+    font-weight: 500;
+    margin-bottom: 18px;
+}
+
+.signup-hint {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 13.5px;
+    color: var(--ink-500);
+}
+.signup-hint a { color: var(--primary); font-weight: 600; text-decoration: none; }
+.signup-hint a:hover { text-decoration: underline; }
+
+:focus-visible { outline: 2px solid var(--primary-light); outline-offset: 2px; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #c3d6ca; border-radius: 999px; }
+</style>
+</head>
+<body>
+<div class="login-card">
+    <div class="login-banner">
+        <div class="login-badge"><i class="fas fa-user-plus"></i></div>
+        <h1 class="text-xl font-bold font-poppins" style="color: #ffffff; letter-spacing: 0.3px;">Create Account</h1>
+        <p class="text-sm font-medium" style="color: rgba(255,255,255,0.85);">PhilFIDA RO8 DV Tracking System</p>
+    </div>
+    <div class="login-body">
+        <div class="error-banner" id="errorBanner" hidden>
+            <i class="fas fa-circle-exclamation"></i>
+            <span id="errorText"></span>
+        </div>
+        <form method="POST" action="/signup" autocomplete="off">
+            <div class="mb-4">
+                <label class="field-label" for="full_name">Full Name</label>
+                <input type="text" id="full_name" name="full_name" class="input-field" placeholder="Juan Dela Cruz" value="" required autofocus>
+            </div>
+            <div class="mb-4">
+                <label class="field-label" for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="input-field" placeholder="you@example.com" value="" autocomplete="email" required>
+            </div>
+            <div class="mb-4">
+                <label class="field-label" for="password">Password</label>
+                <div class="password-wrap">
+                    <input type="password" id="password" name="password" class="input-field" placeholder="At least 6 characters" required style="padding-right: 44px;">
+                    <button type="button" class="password-toggle" onclick="togglePassword('password','toggleIcon1')" tabindex="-1" aria-label="Show password">
+                        <i class="fas fa-eye" id="toggleIcon1"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mb-5">
+                <label class="field-label" for="confirm_password">Confirm Password</label>
+                <div class="password-wrap">
+                    <input type="password" id="confirm_password" name="confirm_password" class="input-field" placeholder="Re-enter your password" required style="padding-right: 44px;">
+                    <button type="button" class="password-toggle" onclick="togglePassword('confirm_password','toggleIcon2')" tabindex="-1" aria-label="Show password">
+                        <i class="fas fa-eye" id="toggleIcon2"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mb-6">
+                <label class="field-label">Account Type</label>
+                <div class="role-picker">
+                    <label class="role-option">
+                        <input type="radio" name="role" value="user" checked>
+                        <span class="role-card">
+                            <i class="fas fa-user"></i>
+                            <span>
+                                <span class="role-name" style="display:block;">User</span>
+                                <span class="role-desc">Track &amp; process vouchers</span>
+                            </span>
+                        </span>
+                    </label>
+                    <label class="role-option">
+                        <input type="radio" name="role" value="admin" >
+                        <span class="role-card">
+                            <i class="fas fa-user-shield"></i>
+                            <span>
+                                <span class="role-name" style="display:block;">Admin</span>
+                                <span class="role-desc">Full system access</span>
+                            </span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+            <button type="submit" class="btn-signin">
+                <i class="fas fa-user-plus"></i>
+                Create Account
+            </button>
+        </form>
+        <div class="signup-hint">Already have an account? <a href="login.html">Sign in here</a></div>
+    </div>
+</div>
+<script>
+// The backend redirects back here with ?error=<message> on a failed signup.
+(function () {
+    var err = new URLSearchParams(window.location.search).get('error');
+    if (err) {
+        document.getElementById('errorText').textContent = err;
+        document.getElementById('errorBanner').hidden = false;
+    }
+})();
+</script>
+<script>
+function togglePassword(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    icon.classList.toggle('fa-eye', !show);
+    icon.classList.toggle('fa-eye-slash', show);
+}
+</script>
+</body>
+</html>
