@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhilFIDA RO8 - DV Tracking System</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen">
+<div id="toastStack"></div>
+<!-- Header -->
+<header class="glass sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center overflow-hidden bg-white shadow-sm" style="border: 1px solid rgba(255,255,255,0.5);">
+                    <img src="" id="headerLogo" alt="PhilFIDA Logo" class="w-full h-full object-contain p-1">
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold font-poppins" style="color: #ffffff; letter-spacing: 0.3px;">
+                        PhilFIDA RO8
+                    </h1>
+                    <p class="text-sm font-medium" style="color: rgba(255,255,255,0.8);">Disbursement Voucher Tracking System</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="header-user-chip">
+                    <div class="header-avatar" id="headerAvatar">A</div>
+                    <div class="text-left">
+                        <div class="text-sm font-semibold leading-tight" style="color: #ffffff;" id="headerUserName">Loading&hellip;</div>
+                        <div class="text-xs font-semibold" style="color: var(--gold-light); text-transform: uppercase; letter-spacing: 0.4px;">
+                            <span id="headerUserRole"></span>
+                        </div>
+                    </div>
+                </div>
+                <a href="/logout" title="Sign out" class="header-logout">
+                    <i class="fas fa-right-from-bracket"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 py-8">
+    <!-- Welcome Hero -->
+    <section class="dashboard-hero fade-in">
+        <div>
+            <div class="hero-greeting" id="heroGreeting">Welcome back 👋</div>
+            <p class="hero-sub">Manage and track all disbursement vouchers from one dashboard.</p>
+            <div class="hero-date"><i class="fas fa-calendar-day"></i> <span id="todayDate"></span></div>
+        </div>
+        <div class="hero-actions">
+            <button onclick="openCreateDV()" class="btn btn-success">
+                <i class="fas fa-file-signature"></i> Create DV
+            </button>
+        </div>
+    </section>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 mb-7 fade-in" style="animation-delay: 0.05s;">
+        <!-- Total Vouchers -->
+        <div class="stat-card" data-stat="total" onclick="setStatusFilter('total', this)" title="Show all vouchers">
+            <span class="stat-check"><i class="fas fa-check"></i></span>
+            <div class="stat-icon total">
+                <i class="fas fa-file-invoice"></i>
+            </div>
+            <div class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Total Vouchers</div>
+            <div class="text-3xl font-bold mt-2 count-up" style="color: var(--ink-900);" id="statTotal" data-value="0">0</div>
+            <div class="text-xs text-slate-400 mt-2">All time records</div>
+        </div>
+        <!-- Received -->
+        <div class="stat-card" data-stat="receiving" onclick="setStatusFilter('receiving', this)" title="Filter: vouchers that have been received">
+            <span class="stat-check"><i class="fas fa-check"></i></span>
+            <div class="stat-icon receiving">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <div class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Received</div>
+            <div class="text-3xl font-bold mt-2 count-up" style="color: #b45309;" id="statReceiving" data-value="0">0</div>
+            <div class="text-xs text-slate-400 mt-2">Vouchers received</div>
+        </div>
+        <!-- Released -->
+        <div class="stat-card" data-stat="releasing" onclick="setStatusFilter('releasing', this)" title="Filter: vouchers that have been released">
+            <span class="stat-check"><i class="fas fa-check"></i></span>
+            <div class="stat-icon releasing">
+                <i class="fas fa-paper-plane"></i>
+            </div>
+            <div class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Released</div>
+            <div class="text-3xl font-bold mt-2 count-up" style="color: #0369a1;" id="statReleasing" data-value="0">0</div>
+            <div class="text-xs text-slate-400 mt-2">Vouchers released</div>
+        </div>
+        <!-- Issuance of Check: Awaiting Releasing -->
+        <div class="stat-card" data-stat="check" onclick="setStatusFilter('check', this)" title="Filter: check received but not yet released">
+            <span class="stat-check" style="background: #6d28d9;"><i class="fas fa-check"></i></span>
+            <div class="stat-icon" style="background: #ede9fe; color: #6d28d9;">
+                <i class="fas fa-hand-holding-usd"></i>
+            </div>
+            <div class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Issuance of Check</div>
+            <div class="text-3xl font-bold mt-2 count-up" style="color: #6d28d9;" id="statCheckReleasing" data-value="0">0</div>
+            <div class="text-xs text-slate-400 mt-2">Check releasing</div>
+        </div>
+        <!-- Completed -->
+        <div class="stat-card" data-stat="completed" onclick="setStatusFilter('completed', this)" title="Filter: completed vouchers">
+            <span class="stat-check"><i class="fas fa-check"></i></span>
+            <div class="stat-icon completed">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Completed</div>
+            <div class="text-3xl font-bold mt-2 count-up" style="color: var(--primary-dark);" id="statCompleted" data-value="0">0</div>
+            <div class="text-xs text-slate-400 mt-2">Successfully processed</div>
+        </div>
+    </div>
+
+    <!-- Toolbar: Search & Filters -->
+    <div class="toolbar-card fade-in" style="animation-delay: 0.1s;">
+        <div class="flex flex-wrap gap-3">
+            <button onclick="openScanner()" class="btn btn-primary">
+                <i class="fas fa-qrcode"></i>
+                Scan QR
+            </button>
+            <button onclick="openNewVoucher()" class="btn btn-success">
+                <i class="fas fa-plus-circle"></i>
+                New Voucher
+            </button>
+            <button onclick="spinRefresh(this)" class="btn" style="background: var(--surface-muted); color: var(--ink-700); border: 1.5px solid var(--border);">
+                <i class="fas fa-sync-alt" id="refreshIcon"></i>
+                Refresh
+            </button>
+        </div>
+        <div class="flex-1 min-w-[200px]">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" placeholder="Search by DV No., Payee, or Particulars..."
+                    class="input-field search-input" oninput="handleSearch(); document.getElementById('searchKbdHint').style.display = this.value ? 'none' : '';"
+                    onfocus="document.getElementById('searchKbdHint').style.display='none';"
+                    onblur="document.getElementById('searchKbdHint').style.display = this.value ? 'none' : '';">
+                <kbd id="searchKbdHint" style="position:absolute; right:34px; top:50%; transform:translateY(-50%); font-size:10.5px; font-weight:600; color:var(--ink-400); background:var(--surface-muted); border:1px solid var(--border); border-radius:5px; padding:2px 6px; pointer-events:none;">/</kbd>
+                <i class="fas fa-times clear-icon hidden" id="clearSearchBtn" onclick="clearSearch()"></i>
+            </div>
+        </div>
+        <div class="toolbar-filters">
+            <select id="yearFilter" class="input-field filter-select" onchange="loadVouchers()">
+                <option value="">All Years</option>
+            </select>
+            <select id="monthFilter" class="input-field filter-select" onchange="loadVouchers()">
+                <option value="">All Months</option>
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container fade-in">
+        <div class="table-header">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-bold font-poppins" style="color: var(--ink-900);">Voucher Records</h2>
+                    <p class="text-sm text-slate-500 mt-1">Manage and track all disbursement vouchers</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="filterChipSlot"></span>
+                    <div class="text-sm text-slate-500" id="resultsInfo">Loading...</div>
+                </div>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full" id="recordsTable">
+                <thead style="background: var(--surface-muted); border-bottom: 1px solid var(--border);">
+                    <tr class="text-left text-xs uppercase font-semibold" style="letter-spacing: 0.6px; color: var(--ink-500); white-space: nowrap;">
+                        <th class="px-6 py-4 sortable" data-sort="dv_no" onclick="sortBy('dv_no')">DV No. <i class="fas fa-arrow-up sort-icon"></i></th>
+                        <th class="px-6 py-4 sortable" data-sort="date" onclick="sortBy('date')">Date <i class="fas fa-arrow-up sort-icon"></i></th>
+                        <th class="px-6 py-4 sortable" data-sort="payee" onclick="sortBy('payee')">Payee <i class="fas fa-arrow-up sort-icon"></i></th>
+                        <th class="px-6 py-4">Particulars</th>
+                        <th class="px-6 py-4 text-right sortable" data-sort="gross_amount" onclick="sortBy('gross_amount')">Gross Amount <i class="fas fa-arrow-up sort-icon"></i></th>
+                        <th class="px-6 py-4 text-right">Less Tax</th>
+                        <th class="px-6 py-4 text-right sortable" data-sort="net_amount" onclick="sortBy('net_amount')">Net Amount <i class="fas fa-arrow-up sort-icon"></i></th>
+                        <th class="px-6 py-4">Received</th>
+                        <th class="px-6 py-4">Remarks</th>
+                        <th class="px-6 py-4">Released</th>
+                        <th class="px-6 py-4">Remarks</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="voucherTable" style="border-top: 1px solid var(--border-soft);">
+                    <tr style="border-bottom: 1px solid var(--border-soft);">
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-soft);">
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-soft);">
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-soft);">
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-soft);">
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-soft);">
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                        <td class="px-6 py-4"><div class="skeleton-bar" style="width: 72%;"></div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- Floating scroll-to-top button -->
+<button id="scrollTopBtn" class="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">
+    <i class="fas fa-arrow-up"></i>
+</button>
+
+<!-- Modals -->
+<!-- New Voucher Modal -->
+<div id="newVoucherModal" onclick="if(event.target===this) closeModal('newVoucherModal')" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+    <div class="modal-content w-full max-w-5xl max-h-[95vh] overflow-y-auto">
+        <div class="p-4 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div>
+                <h2 class="text-xl font-bold font-poppins" style="color: var(--ink-900);">New Disbursement Voucher</h2>
+                <p class="text-xs text-slate-500 mt-1">Quick fill-up form for tracking</p>
+            </div>
+            <div class="flex gap-2">
+                <button id="saveVoucherBtn" onclick="saveVoucher()" class="btn btn-success">
+                    <i class="fas fa-save"></i>
+                    Save
+                </button>
+                <button onclick="closeModal('newVoucherModal')" class="btn" style="background: #f1f5f9; color: #475569;">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+            </div>
+        </div>
+
+        <div class="p-6 space-y-5" id="voucherPaperNew">
+
+            <!-- DV No. -->
+            <div class="flex items-center justify-between gap-4 p-4 rounded-xl" style="background: var(--accent-soft); border: 1px solid var(--border);">
+                <div class="flex-1 min-w-0">
+                    <label for="newDvNo" class="text-xs font-semibold uppercase tracking-wide" style="color: var(--primary-dark);">DV No.</label>
+                    <input type="text" id="newDvNo" class="input-field font-poppins font-bold mt-1" style="font-size: 1.5rem;" placeholder="Enter DV No." oninput="this.classList.remove('field-invalid')">
+                </div>
+            </div>
+
+            <!-- Payee / Particulars -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm font-semibold text-slate-700 mb-1 block">Payee</label>
+                    <input type="text" id="newPayee" class="input-field" placeholder="Payee name" oninput="this.classList.remove('field-invalid')">
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-slate-700 mb-1 block">Date</label>
+                    <input type="date" id="newDate" class="input-field">
+                </div>
+            </div>
+            <div>
+                <label class="text-sm font-semibold text-slate-700 mb-1 block">Particulars</label>
+                <textarea id="newParticulars" class="input-field" rows="3" placeholder="Description of disbursement..."></textarea>
+            </div>
+
+            <!-- Amounts -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="text-sm font-semibold text-slate-700 mb-1 block">Gross Amount</label>
+                    <input type="number" step="0.01" id="newGrossAmount" class="input-field" placeholder="0.00" oninput="calcNet()">
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-slate-700 mb-1 block">Less Tax</label>
+                    <input type="number" step="0.01" id="newLessTax" class="input-field" placeholder="0.00" oninput="calcNet()">
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-slate-700 mb-1 block">Net Amount</label>
+                    <input type="text" id="newNetAmount" class="input-field" style="background: var(--surface-muted); font-weight:700;" readonly value="0.00">
+                </div>
+            </div>
+
+            <!-- Receiving, Processing, and Issuance of Check are tracked from the
+                 Actions column on the table (Mark Received / Mark Released / etc.)
+                 rather than being set here at creation time. -->
+        </div>
+
+    </div>
+</div>
+
+<!-- Create DV Modal — exact editable replica of the official DV form -->
+<div id="createDVModal" onclick="if(event.target===this) closeModal('createDVModal')" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+    <div class="modal-content w-full max-w-5xl max-h-[95vh] overflow-y-auto">
+        <div class="p-4 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div>
+                <h2 class="text-xl font-bold font-poppins" style="color: var(--ink-900);">Create Disbursement Voucher</h2>
+                <p class="text-xs text-slate-500 mt-1">Fill up the official DV form directly</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="submitCreateDV()" class="btn btn-success" id="dvSaveBtn">
+                    <i class="fas fa-save"></i>
+                    Save
+                </button>
+                <button onclick="exportCreateDVExcel()" class="btn" style="background: #16a34a; color: #fff;" id="dvExportExcelBtn">
+                    <i class="fas fa-file-excel"></i>
+                    Download Excel
+                </button>
+                <button onclick="exportCreateDVPDF()" class="btn btn-danger" id="dvExportPdfBtn">
+                    <i class="fas fa-file-pdf"></i>
+                    Export PDF
+                </button>
+                <button onclick="closeModal('createDVModal')" class="btn" style="background: #f1f5f9; color: #475569;">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+            </div>
+        </div>
+
+        <div class="p-6" style="overflow-x:auto;">
+        <div class="dv-a4-frame">
+        <div class="dv-paper" id="dvPaperSheet" style="padding: 0.25in 0.39in 0.2in 0.27in;">
+<table class="dv-grid" style="width:100%; border-collapse:collapse; table-layout:fixed; font-family:'Times New Roman','Tinos',Times,serif;">
+<colgroup>
+<col style="width:2.401%">
+<col style="width:2.154%">
+<col style="width:1.958%">
+<col style="width:1.044%">
+<col style="width:1.436%">
+<col style="width:1.632%">
+<col style="width:4.374%">
+<col style="width:4.374%">
+<col style="width:4.374%">
+<col style="width:4.374%">
+<col style="width:4.374%">
+<col style="width:4.374%">
+<col style="width:4.374%">
+<col style="width:4.374%">
+<col style="width:4.374%">
+<col style="width:4.374%">
+<col style="width:3.474%">
+<col style="width:1.763%">
+<col style="width:1.632%">
+<col style="width:4.374%">
+<col style="width:4.374%">
+<col style="width:4.374%">
+<col style="width:2.350%">
+<col style="width:1.632%">
+<col style="width:4.374%">
+<col style="width:1.958%">
+<col style="width:2.154%">
+<col style="width:1.632%">
+<col style="width:4.374%">
+<col style="width:2.088%">
+<col style="width:1.632%">
+<col style="width:2.220%">
+<col style="width:1.240%">
+</colgroup>
+<tr style="height:10.5pt;">
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden" colspan="6"></td>
+</tr>
+<tr style="height:2.25pt;">
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:27.0pt;">
+<td style="border-top:2px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:9.0pt;font-weight:bold;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="3" colspan="27"><div style="position:relative; text-align:center; line-height:1.25;"><img src="" alt="" style="position:absolute; left:2px; top:0; width:42px; height:auto;" onerror="this.style.display='none'"><div style="font-weight:bold;">PHILIPPINE FIBER INDUSTRY DEVELOPMENT AUTHORITY</div><div>Rosvenil Subdivision, B. Aquino Avenue, Apitong Road, Tacloban City</div><div>Email: <span style="color:#0070C0; text-decoration:underline;">rotacloban@philfida.da.gov.ph</span> Website: <span style="color:#0070C0; text-decoration:underline;">www.philfida.da.gov.ph</span></div><div>Telephone Number: (053) 888-2428</div><img src="" alt="" style="position:absolute; right:2px; top:0; width:34px; height:auto;" onerror="this.style.display='none'"></div></td>
+<td style="border-top:2px solid #000;border-left:1px solid #000;border-right:2px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="6">Fund Cluster : </td>
+</tr>
+<tr style="height:15.0pt;">
+<td style="border-bottom:1px solid #000;border-left:1px solid #000;border-right:2px solid #000;font-size:11.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="6"><input type="text" id="dvFundCluster" class="dv-cell-input" style="" placeholder=""></td>
+</tr>
+<tr style="height:15.0pt;">
+<td style="border-left:1px solid #000;border-right:2px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="6">Date : <input type="date" id="dvDate" class="dv-cell-input dv-inline-input"></td>
+</tr>
+<tr style="height:15.0pt;">
+<td style="border-bottom:2px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:14.0pt;font-weight:bold;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="27"><div style="display:flex; align-items:center; justify-content:center; gap:10px;"><span>DISBURSEMENT&nbsp; VOUCHER</span><div id="dvHeaderQR" style="width:40px; height:40px; display:flex; align-items:center; justify-content:center;"></div></div></td>
+<td style="border-left:1px solid #000;border-right:2px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="6">DV No. : <input type="text" id="dvNo" class="dv-cell-input dv-inline-input" oninput="updateDVQR()"></td>
+</tr>
+<tr style="height:6.0pt;">
+<td style="border-bottom:2px solid #000;border-right:2px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="6"></td>
+</tr>
+<tr style="height:9.75pt;">
+<td style="border-top:2px solid #000;border-bottom:2px solid #000;border-left:2px solid #000;font-size:8.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 2px;overflow:visible;white-space:nowrap" rowspan="3" colspan="6">Mode of Payment</td>
+<td style="border-top:2px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-left:1px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="26"></td>
+</tr>
+<tr style="height:14.0pt;">
+<td style="border-right:2px solid #000;padding:2px 6px;overflow:hidden" colspan="27">
+<div style="display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:nowrap;">
+<label style="display:inline-flex;align-items:center;gap:3px;font-size:10.5pt;white-space:nowrap;margin:0;"><input type="radio" name="dvModePayment" value="MDS Check" class="dv-mode-radio" style="margin-right:4px;">MDS Check</label>
+<label style="display:inline-flex;align-items:center;gap:3px;font-size:10.5pt;white-space:nowrap;margin:0;"><input type="radio" name="dvModePayment" value="Commercial Check" class="dv-mode-radio" style="margin-right:4px;">Commercial Check</label>
+<label style="display:inline-flex;align-items:center;gap:3px;font-size:10.5pt;white-space:nowrap;margin:0;"><input type="radio" name="dvModePayment" value="ADA" class="dv-mode-radio" style="margin-right:4px;">ADA</label>
+<label style="display:inline-flex;align-items:center;gap:3px;font-size:10.5pt;white-space:nowrap;margin:0;"><input type="radio" name="dvModePayment" value="Others" class="dv-mode-radio" style="margin-right:4px;">Others (Please specify)</label>
+</div>
+</td>
+</tr>
+<tr style="height:14.25pt;">
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;border-left:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="4"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="6"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:top;padding:1px 3px;overflow:hidden"><input type="text" id="dvOthersSpecify" class="dv-cell-input" style="" placeholder=""></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:15.0pt;">
+<td style="border-top:2px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:8.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:visible;white-space:nowrap" rowspan="2" colspan="3">Payee</td>
+<td style="border-top:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:11.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="14"><input type="text" id="dvPayee" class="dv-cell-input" style="font-weight:bold;" placeholder="Full name of payee" oninput="updateDVQR(); this.classList.remove('field-invalid')"></td>
+<td style="border-top:2px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="9">TIN/Employee No.:</td>
+<td style="border-top:2px solid #000;border-left:1px solid #000;border-right:2px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="6">ORS/BURS No.: </td>
+</tr>
+<tr style="height:10.5pt;">
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;border-right:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="9"><input type="text" id="dvTinEmployeeNo" class="dv-cell-input" style="" placeholder=""></td>
+<td style="border-left:1px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="6"><input type="text" id="dvOrsBursNo" class="dv-cell-input" style="" placeholder=""></td>
+</tr>
+<tr style="height:12.0pt;">
+<td style="border-top:1px solid #000;border-bottom:2px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:8.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 2px;overflow:hidden;white-space:nowrap" rowspan="2" colspan="4">Address</td>
+<td style="border-top:1px solid #000;border-bottom:2px solid #000;border-left:1px solid #000;border-right:2px solid #000;font-size:11.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="29"><input type="text" id="dvAddress" class="dv-cell-input" style="" placeholder=""></td>
+</tr>
+<tr style="height:12.0pt;">
+</tr>
+<tr style="height:28.25pt;">
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="20">Particulars</td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="4">Responsibility Center</td>
+<td style="border-bottom:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:9.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="3">MFO/PAP</td>
+<td style="border-bottom:1px solid #000;border-left:1px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="6">Amount</td>
+</tr>
+<tr style="height:14.0pt;">
+<td style="border-left:2px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="17"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"><input type="text" id="dvResponsibilityCenter" class="dv-cell-input" style="" placeholder=""></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:1px solid #000;border-left:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"><input type="text" id="dvMfoPap" class="dv-cell-input" style="" placeholder=""></td>
+<td style="border-top:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:1px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:1px solid #000;border-left:1px solid #000;border-right:2px solid #000;font-size:11.0pt;text-align:right;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="6"><input type="number" step="0.01" id="dvGrossAmount" class="dv-cell-input" style="text-align:right;" placeholder="0.00"  oninput="calcDVNet()"></td>
+</tr>
+<tr style="height:18.0pt;">
+<td style="border-left:2px solid #000;border-right:1px solid #000;font-size:11.0pt;text-align:left;vertical-align:top;padding:1px 3px;overflow:hidden" rowspan="8" colspan="20"><textarea id="dvParticulars" class="dv-cell-input dv-cell-textarea" rows="6" placeholder="Description of disbursement..."></textarea></td>
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:11.0pt;text-align:right;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:11.0pt;text-align:right;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:14.0pt;">
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:11.0pt;text-align:right;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:11.0pt;text-align:right;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:14.0pt;">
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:11.0pt;text-align:right;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:11.0pt;text-align:right;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:14.0pt;">
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:11.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden">Php</td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="4"><input type="number" step="0.01" id="dvNetAmount" class="dv-cell-input" style="text-align:right;font-weight:bold;" placeholder="0.00" readonly ></td>
+</tr>
+<tr style="height:14.0pt;">
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:11.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:14.0pt;">
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:11.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:14.0pt;">
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:11.0pt;text-align:right;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:11.0pt;text-align:right;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:14.0pt;">
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;border-right:2px solid #000;font-size:11.0pt;text-align:right;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="6"></td>
+</tr>
+<tr style="height:14.0pt;">
+<td style="border-left:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"> </td>
+<td style="border-left:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;border-left:1px solid #000;border-right:2px solid #000;font-size:11.0pt;text-align:right;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="6"></td>
+</tr>
+<tr style="height:16.5pt;">
+<td style="border-left:2px solid #000;font-size:12.0pt;font-weight:bold;text-align:right;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="17">Amount Due . . .</td>
+<td style="border-bottom:2px solid #000;font-size:12.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:12.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden">  </td>
+<td style="border-bottom:2px solid #000;border-right:1px solid #000;font-size:12.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;border-left:1px solid #000;font-size:12.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:12.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:12.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;border-right:1px solid #000;font-size:12.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;border-left:1px solid #000;font-size:12.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:12.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;border-right:1px solid #000;font-size:12.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:1px solid #000;border-bottom:3px double #000;border-left:1px solid #000;font-size:12.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden">P</td>
+<td style="border-top:1px solid #000;border-bottom:3px double #000;border-right:2px solid #000;font-size:12.0pt;font-weight:bold;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="5"><input type="text" id="dvAmountDue" class="dv-cell-input" style="text-align:center;font-weight:bold;" placeholder="0.00" readonly></td>
+</tr>
+<tr style="height:17.5pt;">
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:visible;white-space:nowrap">A.</td>
+<td style="border-top:2px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="32"> Certified:  Expenses/Cash Advance necessary,  lawful and  incurred under my direct supervision.</td>
+</tr>
+<tr style="height:9.0pt;">
+<td style="border-left:2px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden">  </td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:10.0pt;font-weight:bold;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:30.0pt;">
+<td style="border-left:2px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:0.5px solid #000;font-size:11.0pt;font-weight:bold;text-align:center;vertical-align:bottom;padding:1px 3px 0px 3px;overflow:hidden" colspan="16"><input type="text" id="dvCertifiedName" class="dv-cell-input" style="font-weight:bold; width:100%; display:inline-block; text-align:center;" placeholder="Printed name"><input type="text" id="dvCertifiedDesignation" style="display:none;"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:10.0pt;font-weight:bold;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:11.5pt;">
+<td style="border-left:2px solid #000;font-size:8.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden" colspan="31"></td>
+<td style="border-right:2px solid #000;font-size:8.0pt;font-weight:bold;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:10.5pt;">
+<td style="border-left:2px solid #000;font-size:8.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="font-size:8.0pt;font-style:italic;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="31"> Printed Name and Signature of Supervisor</td>
+<td style="border-right:2px solid #000;font-size:8.0pt;font-weight:bold;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:6.0pt;">
+<td style="border-left:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden" colspan="13"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:19.0pt;">
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:visible;white-space:nowrap">B.</td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:visible;white-space:nowrap"> Accounting Entry:</td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;border-right:2px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:15.75pt;">
+<td style="border-bottom:1px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="18">Account Title</td>
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="5">UACS Code</td>
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="5">Debit</td>
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="5">Credit</td>
+</tr>
+<tr style="height:6.0pt;">
+<td style="border-left:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:1px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:1px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:1px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:15.75pt;">
+<td style="border-left:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"><input type="text" id="dvAccountTitle" class="dv-cell-input" style="" placeholder=""></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"><input type="text" id="dvUacsCode" class="dv-cell-input" style="" placeholder=""></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"><input type="number" step="0.01" id="dvDebit" class="dv-cell-input" style="text-align:right;" placeholder="0.00"  ></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"><input type="number" step="0.01" id="dvCredit" class="dv-cell-input" style="text-align:right;" placeholder="0.00"  ></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:15.75pt;">
+<td style="border-bottom:2px solid #000;border-left:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:2px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:16.0pt;">
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:visible;white-space:nowrap">C.</td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:visible;white-space:nowrap">Certified:</td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:visible;white-space:nowrap">D.</td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;border-left:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="11">Approved for Payment</td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:6.5pt;">
+<td style="border-left:2px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-left:2px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:11.25pt;">
+<td style="border-left:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"><input type="checkbox" id="dvChkCash" style="width:100%;height:100%;margin:0;"></td>
+<td style="font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:visible;white-space:nowrap;"> Cash available</td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:2px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="7" colspan="15"></td>
+</tr>
+<tr style="height:4.5pt;">
+<td style="border-left:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="7"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:11.25pt;">
+<td style="border-left:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"><input type="checkbox" id="dvChkDebitAccount" style="width:100%;height:100%;margin:0;"></td>
+<td style="font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:visible;white-space:nowrap;"> Subject to Authority to Debit Account (when applicable)</td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:7.5pt;">
+<td style="border-left:2px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="18"></td>
+</tr>
+<tr style="height:11.25pt;">
+<td style="border-left:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"><input type="checkbox" id="dvChkSupportingDocs" style="width:100%;height:100%;margin:0;"></td>
+<td style="font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:visible;white-space:nowrap;" colspan="2"> Supporting documents complete and amount claimed </td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:11.25pt;">
+<td style="border-left:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:visible;white-space:nowrap;">proper</td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:6.0pt;">
+<td style="border-bottom:1px solid #000;border-left:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:15.0pt;">
+<td style="border-bottom:1px solid #000;border-left:2px solid #000;font-size:8.0pt;text-align:center;vertical-align:middle;padding:1px 2px;overflow:hidden;white-space:nowrap" rowspan="2" colspan="4">Signature</td>
+<td style="border-bottom:1px solid #000;border-left:1px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="14"></td>
+<td style="border-bottom:1px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:8.0pt;text-align:center;vertical-align:middle;padding:1px 2px;overflow:hidden;white-space:nowrap" rowspan="2" colspan="4">Signature</td>
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:1px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="11"></td>
+</tr>
+<tr style="height:14.0pt;">
+</tr>
+<tr style="height:15.0pt;">
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="4">Printed Name</td>
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:1px solid #000;border-right:2px solid #000;font-size:11.0pt;font-weight:bold;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="14"><input type="text" id="dvSectionCName" class="dv-cell-input" style="font-weight:bold;" placeholder=""></td>
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="4">Printed Name</td>
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:1px solid #000;border-right:2px solid #000;font-size:11.0pt;font-weight:bold;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="11"><input type="text" id="dvApprovedName" class="dv-cell-input" style="font-weight:bold;" placeholder=""></td>
+</tr>
+<tr style="height:14.0pt;">
+</tr>
+<tr style="height:15.65pt;">
+<td style="border-bottom:1px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="4">Position</td>
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:1px solid #000;border-right:2px solid #000;font-size:9.0pt;font-style:italic;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="14"><input type="text" id="dvSectionCPosition" class="dv-cell-input" style="" placeholder=""></td>
+<td style="border-bottom:1px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="4">Position</td>
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:1px solid #000;border-right:2px solid #000;font-size:9.0pt;font-style:italic;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="11"><input type="text" id="dvApprovedPosition" class="dv-cell-input" style="" placeholder=""></td>
+</tr>
+<tr style="height:9.0pt;">
+<td style="border-top:1px solid #000;border-bottom:2px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="4">Date</td>
+<td style="border-bottom:2px solid #000;border-left:1px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="14"><input type="date" id="dvSectionCDate" class="dv-cell-input"></td>
+<td style="border-top:1px solid #000;border-bottom:2px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="4">Date</td>
+<td style="border-top:1px solid #000;border-bottom:2px solid #000;border-left:1px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="11"><input type="date" id="dvApprovedDate" class="dv-cell-input"></td>
+</tr>
+<tr style="height:15.75pt;">
+</tr>
+<tr style="height:13.5pt;">
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:visible;white-space:nowrap">E. </td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:visible;white-space:nowrap">Receipt of Payment </td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-bottom:1px solid #000;border-right:1px solid #000;font-size:10.0pt;font-weight:bold;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:visible;white-space:nowrap">JEV  No.</td>
+<td style="border-top:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="3"><input type="text" id="dvJevNo" class="dv-cell-input" style="" placeholder=""></td>
+</tr>
+<tr style="height:12.75pt;">
+<td style="border-bottom:1px solid #000;border-left:2px solid #000;font-size:10.0pt;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="3">Check/   ADA No. :</td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="9"><input type="text" id="dvCheckAdaNo" class="dv-cell-input" style="" placeholder=""></td>
+<td style="border-bottom:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="5">Date : <input type="date" id="dvReceiptDate" class="dv-cell-input dv-inline-input"></td>
+<td style="border-bottom:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="9">Bank Name &amp; Account Number: <input type="text" id="dvBankNameAccount" class="dv-cell-input dv-inline-input"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:14.0pt;">
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-bottom:1px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+</tr>
+<tr style="height:12.75pt;">
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:8.0pt;text-align:center;vertical-align:middle;padding:1px 2px;overflow:hidden;white-space:nowrap" rowspan="2" colspan="4">Signature :</td>
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="9"><input type="text" id="dvReceiptSignatureName" class="dv-cell-input" style="font-weight:bold;" placeholder=""></td>
+<td style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="5">Date :</td>
+<td style="border-top:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:9.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="9">Printed Name: </td>
+<td style="border-top:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:1px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="4"></td>
+</tr>
+<tr style="height:14.25pt;">
+<td style="border-bottom:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:9.0pt;font-weight:bold;text-align:center;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="9"></td>
+<td style="border-bottom:2px solid #000;border-right:2px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" rowspan="2" colspan="6"></td>
+</tr>
+<tr style="height:15.65pt;">
+<td style="border-top:1px solid #000;border-bottom:2px solid #000;border-left:2px solid #000;border-right:1px solid #000;font-size:10.0pt;text-align:left;vertical-align:middle;padding:1px 3px;overflow:hidden" colspan="27">Official Receipt No. &amp; Date/Other Documents <input type="text" id="dvOfficialReceiptNo" class="dv-cell-input dv-inline-input"></td>
+</tr>
+<tr style="height:13.0pt;">
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="padding:1px 3px;overflow:hidden"></td>
+<td style="border-top:2px solid #000;font-size:8.0pt;font-style:italic;text-align:right;vertical-align:top;padding:1px 3px;overflow:hidden" colspan="6">Revised: 08/2022</td>
+</tr>
+</table>
+</div>
+</div>
+<div style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:9pt; color:#666; font-family:'Times New Roman','Tinos',Times,serif;">
+    <em>Not on the official form — used only to compute the Amount above:</em>
+    <label style="display:flex; align-items:center; gap:4px;">Less Tax:
+        <input type="number" step="0.01" id="dvLessTax" class="dv-input" style="width:90px; border-bottom:1px solid #000;" placeholder="0.00" oninput="calcDVNet()">
+    </label>
+</div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- Scanner Modal -->
+<div id="scannerModal" onclick="if(event.target===this) closeScanner()" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+    <div class="modal-content w-full max-w-md">
+        <div class="p-6 border-b border-slate-200 flex justify-between items-center">
+            <div>
+                <h2 class="text-xl font-bold font-poppins text-slate-800">Scan Voucher QR</h2>
+                <p class="text-sm text-slate-500 mt-1">Point camera at a voucher's QR code</p>
+            </div>
+            <button onclick="closeScanner()" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-slate-100 transition">
+                <i class="fas fa-times text-slate-600"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <div id="qr-reader" class="rounded-xl overflow-hidden mb-4"></div>
+            <div class="text-center text-sm text-slate-500 mb-3">or use manually</div>
+            <div class="flex gap-2">
+                <input type="text" id="manualDv" placeholder="Type DV No." class="input-field flex-1">
+                <button onclick="lookupManual()" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    Lookup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detail Modal -->
+<div id="detailModal" onclick="if(event.target===this) closeModal('detailModal')" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+    <div class="modal-content w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-slate-200 flex justify-between items-center">
+            <div>
+                <h2 class="text-xl font-bold font-poppins text-slate-800" id="detailTitle">Voucher Details</h2>
+                <p class="text-sm text-slate-500 mt-1" id="detailSubtitle"></p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="previewDV(currentVoucher)" class="btn btn-danger">
+                    <i class="fas fa-file-pdf"></i>
+                    PDF
+                </button>
+                <button onclick="closeModal('detailModal')" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-slate-100 transition">
+                    <i class="fas fa-times text-slate-600"></i>
+                </button>
+            </div>
+        </div>
+        <div class="p-6 space-y-4" id="detailBody"></div>
+    </div>
+</div>
+
+<!-- QR Modal -->
+<div id="qrModal" onclick="if(event.target===this) closeModal('qrModal')" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+    <div class="modal-content w-full max-w-sm">
+        <div class="p-6 border-b border-slate-200 flex justify-between items-center">
+            <div>
+                <h2 class="text-xl font-bold font-poppins text-slate-800">Voucher QR Code</h2>
+                <p class="text-sm text-slate-500 mt-1">Scan to check status</p>
+            </div>
+            <button onclick="closeModal('qrModal')" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-slate-100 transition">
+                <i class="fas fa-times text-slate-600"></i>
+            </button>
+        </div>
+        <div class="p-8 flex flex-col items-center">
+            <div id="qrDisplay" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-md"></div>
+            <div class="mt-6 text-center">
+                <div class="text-lg font-bold text-slate-800" id="qrDvLabel"></div>
+            </div>
+            <div id="qrModalHint" style="display:none; margin-top:10px; text-align:center; font-size:12px; max-width:280px;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- PDF Preview Modal -->
+<div id="pdfPreviewModal" onclick="if(event.target===this) closeModal('pdfPreviewModal')" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+    <div class="modal-content w-full max-w-5xl max-h-[95vh] overflow-y-auto">
+        <div class="p-4 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div>
+                <h2 class="text-xl font-bold font-poppins text-slate-800">Disbursement Voucher Preview</h2>
+                <p class="text-xs text-slate-500 mt-1">Review before downloading</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="exportPDF()" class="btn btn-danger">
+                    <i class="fas fa-file-pdf"></i>
+                    Download PDF
+                </button>
+                <button onclick="closeModal('pdfPreviewModal')" class="btn" style="background: #f1f5f9; color: #475569;">
+                    <i class="fas fa-times"></i>
+                    Close
+                </button>
+            </div>
+        </div>
+        <div class="overflow-x-auto bg-slate-100 p-6">
+            <div id="pdfPreviewContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteConfirmModal" onclick="if(event.target===this) closeModal('deleteConfirmModal')" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+    <div class="modal-content w-full max-w-md">
+        <div class="p-6 border-b border-slate-200">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-full flex items-center justify-center" style="background: var(--danger);">
+                    <i class="fas fa-exclamation-triangle text-white text-2xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold font-poppins text-slate-800">Delete Voucher</h2>
+                    <p class="text-sm text-slate-500">This action cannot be undone</p>
+                </div>
+            </div>
+        </div>
+        <div class="p-6 space-y-4">
+            <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+                <p class="text-sm text-red-800 font-semibold mb-2 flex items-center gap-2">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Warning
+                </p>
+                <p class="text-xs text-red-700">You are about to permanently delete this voucher. All associated data will be lost.</p>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-4 border-2 border-slate-200">
+                <p class="text-xs text-slate-500 mb-2">Voucher Details:</p>
+                <p class="text-sm font-semibold text-slate-800" id="deleteVoucherDvNo"></p>
+                <p class="text-xs text-slate-600" id="deleteVoucherPayee"></p>
+                <p class="text-xs text-slate-600" id="deleteVoucherAmount"></p>
+            </div>
+        </div>
+        <div class="p-6 border-t border-slate-200 flex justify-end gap-2">
+            <button onclick="closeModal('deleteConfirmModal')" class="btn" style="background: #f1f5f9; color: #475569;">
+                <i class="fas fa-times"></i>
+                Cancel
+            </button>
+            <button onclick="confirmDelete()" class="btn btn-danger">
+                <i class="fas fa-trash"></i>
+                Delete Permanently
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Remarks Modal — shown when marking a voucher as Received or Released -->
+<div id="remarksModal" onclick="if(event.target===this) closeModal('remarksModal')" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+    <div class="modal-content w-full max-w-md">
+        <div class="p-6 border-b border-slate-200">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-full flex items-center justify-center" id="remarksModalIcon" style="background: var(--primary);">
+                    <i class="fas fa-inbox text-white text-2xl" id="remarksModalIconGlyph"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold font-poppins text-slate-800" id="remarksModalTitle">Mark as Received</h2>
+                    <p class="text-sm text-slate-500" id="remarksModalSubtitle">Add an optional remark for this stage</p>
+                </div>
+            </div>
+        </div>
+        <div class="p-6 space-y-4">
+            <div class="bg-slate-50 rounded-xl p-4 border-2 border-slate-200">
+                <p class="text-xs text-slate-500 mb-1">Voucher</p>
+                <p class="text-sm font-semibold text-slate-800" id="remarksVoucherDvNo"></p>
+                <p class="text-xs text-slate-600" id="remarksVoucherPayee"></p>
+            </div>
+            <div>
+                <label class="text-sm font-semibold text-slate-700 mb-1 block" for="remarksInput">Remarks</label>
+                <textarea id="remarksInput" class="input-field" rows="3" placeholder="Remarks..."></textarea>
+            </div>
+        </div>
+        <div class="p-6 border-t border-slate-200 flex justify-end gap-2">
+            <button onclick="closeModal('remarksModal')" class="btn" style="background: #f1f5f9; color: #475569;">
+                <i class="fas fa-times"></i>
+                Cancel
+            </button>
+            <button onclick="confirmRemarks()" class="btn btn-primary" id="remarksConfirmBtn">
+                <i class="fas fa-check"></i>
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
