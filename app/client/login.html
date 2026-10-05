@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In · PhilFIDA DV Tracking</title>
+  <link rel="stylesheet" href="/src/styles.css" />
+</head>
+<body class="auth-page" data-page="login">
+  <main class="auth-card" aria-labelledby="loginTitle">
+    <div class="auth-brand">
+      <span class="brand-mark" data-logo></span>
+      <h1 id="loginTitle">PhilFIDA DV Tracking</h1>
+      <p>Disbursement Voucher Tracking System · Sign in to continue</p>
+    </div>
+
+    <div class="auth-ok" id="registeredOk" role="status">
+      Account created. Please sign in with your new credentials.
+    </div>
+    <div class="form-error" id="formError" role="alert"></div>
+
+    <form id="loginForm" novalidate>
+      <div class="form-grid">
+        <div class="field">
+          <label for="email">Email address</label>
+          <input class="input" type="email" id="email" name="email" autocomplete="username"
+                 placeholder="you@example.gov.ph" required maxlength="100" />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input class="input" type="password" id="password" name="password" autocomplete="current-password"
+                 placeholder="••••••••" required maxlength="200" />
+        </div>
+        <label class="checkbox-row">
+          <input type="checkbox" id="remember" name="remember" />
+          <span>Remember me for 30 days</span>
+        </label>
+        <button class="btn btn-primary btn-block" type="submit" id="submitBtn">Sign In</button>
+      </div>
+    </form>
+
+    <p class="auth-alt">No account yet? <a href="/signup.html">Create one</a></p>
+  </main>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <script type="module" src="/src/auth.js"></script>
+</body>
+</html>

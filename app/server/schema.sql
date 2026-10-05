@@ -1,0 +1,63 @@
+-- PhilFIDA Disbursement Voucher Tracking System — database schema (MySQL 8)
+-- Column names are snake_case and intentionally match the legacy PHP app's
+-- table so this backend can read an existing database as-is.
+
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(100) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  full_name VARCHAR(150) NOT NULL,
+  role ENUM('admin','user') NOT NULL DEFAULT 'user',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS vouchers (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  dv_no VARCHAR(50),
+  payee VARCHAR(255),
+  particulars TEXT,
+  gross_amount DECIMAL(15,2) DEFAULT 0,
+  less_tax DECIMAL(15,2) DEFAULT 0,
+  net_amount DECIMAL(15,2) DEFAULT 0,
+  created_by VARCHAR(100) DEFAULT 'Clerk',
+  fund_cluster VARCHAR(50),
+  `date` DATE NULL,
+  mode_of_payment VARCHAR(50),
+  others_specify VARCHAR(255),
+  tin_employee_no VARCHAR(50),
+  ors_burs_no VARCHAR(100),
+  address VARCHAR(255),
+  responsibility_center VARCHAR(150),
+  mfo_pap VARCHAR(150),
+  amount_in_words VARCHAR(255),
+  certified_by_name VARCHAR(150),
+  certified_by_designation VARCHAR(150),
+  certified_by_date DATE NULL,
+  accounting_account_title VARCHAR(255),
+  accounting_uacs_code VARCHAR(50),
+  accounting_debit DECIMAL(15,2) DEFAULT 0,
+  accounting_credit DECIMAL(15,2) DEFAULT 0,
+  section_c_name VARCHAR(150),
+  section_c_position VARCHAR(150),
+  section_c_date DATE NULL,
+  approved_by_name VARCHAR(150),
+  approved_by_position VARCHAR(150),
+  approved_by_date DATE NULL,
+  check_ada_no VARCHAR(100),
+  bank_name_account VARCHAR(255),
+  receipt_signature_name VARCHAR(150),
+  receipt_date DATE NULL,
+  official_receipt_no VARCHAR(100),
+  jev_no VARCHAR(100),
+  received_at DATETIME NULL,
+  received_remarks VARCHAR(255),
+  released_at DATETIME NULL,
+  released_remarks VARCHAR(255),
+  check_received_at DATETIME NULL,
+  check_released_at DATETIME NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_vouchers_dv_no (dv_no),
+  INDEX idx_vouchers_date (`date`),
+  INDEX idx_vouchers_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
