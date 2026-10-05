@@ -1,0 +1,1 @@
+{"dependencies":{"html5-qrcode":"^2.3.8","qrcode":"^1.5.4"},"description":"PhilFIDA Disbursement Voucher Tracking — responsive web frontend (Vite + vanilla JavaScript)","devDependencies":{"vite":"^6.3.5"},"name":"philfida-dv-client","private":true,"scripts":{"build":"vite build","dev":"vite","preview":"vite preview"},"type":"module","version":"1.0.0"}
