@@ -1,0 +1,979 @@
+/* ============================================================
+   Design tokens — "fiber & field" palette drawn from the PhilFIDA
+   seal: a deep abaca-leaf green, a raw-fiber gold, and a soft sage
+   backdrop for an official, government-portal feel.
+   ============================================================ */
+:root {
+    --primary: #0f6b4a;
+    --primary-dark: #0a4d36;
+    --primary-light: #1d9467;
+    --gold: #b7791f;
+    --gold-light: #d9a441;
+    --accent-soft: #e7f5ed;
+    --success: #16a34a;
+    --warning: #b7791f;
+    --danger: #dc2626;
+    --info: #0284c7;
+    --violet: #7c3aed;
+
+    --ink-900: #16211c;
+    --ink-700: #3d4a43;
+    --ink-500: #6b7a72;
+    --ink-400: #99a6a0;
+
+    --surface: #ffffff;
+    --surface-muted: #f3f8f4;
+    --paper: #e7f0e9;
+    --border: #dfe9e2;
+    --border-soft: #eaf1ec;
+
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 9px;
+    /* Soft, diffused shadows — low opacity, larger spread — read as calm
+       elevation rather than hard drop-shadows, easier on the eyes. */
+    --shadow-sm: 0 1px 2px rgba(22, 33, 28, 0.04), 0 1px 1px rgba(22, 33, 28, 0.03);
+    --shadow-md: 0 10px 28px rgba(22, 33, 28, 0.07), 0 2px 8px rgba(22, 33, 28, 0.04);
+    --shadow-lg: 0 22px 55px rgba(22, 33, 28, 0.14), 0 6px 16px rgba(22, 33, 28, 0.06);
+}
+
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #eef5f0;
+    color: var(--ink-700);
+    min-height: 100vh;
+    line-height: 1.6;
+    letter-spacing: 0.1px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(900px 500px at 5% -5%, rgba(29, 148, 103, 0.12), transparent 55%),
+        radial-gradient(700px 400px at 95% 5%, rgba(183, 121, 31, 0.08), transparent 50%),
+        linear-gradient(180deg, #dfeee3 0%, #eaf3ec 22%, #f2f6f1 55%, #f6f7f3 100%);
+    background-attachment: fixed;
+    z-index: -1;
+    pointer-events: none;
+}
+
+::selection {
+    background: var(--primary-light);
+    color: #fff;
+}
+
+.font-poppins {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Header — solid official banner, like a government portal masthead */
+.glass {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 55%, var(--primary-light) 100%);
+    border-bottom: 3px solid var(--gold);
+    position: relative;
+    box-shadow: 0 4px 24px rgba(10, 77, 54, 0.2);
+    backdrop-filter: blur(12px);
+}
+
+.glass::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+}
+
+.header-user-chip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px 8px 8px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(8px);
+}
+
+.header-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.header-logout {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: white;
+    transition: background 0.18s, transform 0.18s;
+    text-decoration: none;
+}
+.header-logout:hover { background: rgba(255,255,255,0.22); transform: scale(1.05); }
+
+/* Dashboard hero */
+.dashboard-hero {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--gold-light), var(--primary-light));
+}
+
+.hero-greeting {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink-900);
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+}
+
+.hero-sub {
+    font-size: 14px;
+    color: var(--ink-500);
+}
+
+.hero-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--primary-dark);
+    background: var(--accent-soft);
+    padding: 5px 12px;
+    border-radius: 999px;
+}
+
+.hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* Toolbar card */
+.toolbar-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+}
+
+.toolbar-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.filter-select {
+    min-width: 130px;
+    padding: 10px 14px !important;
+    font-size: 13.5px !important;
+}
+
+/* Stat Cards */
+.stat-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 22px 24px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.25s cubic-bezier(.2,.7,.3,1), box-shadow 0.25s ease, border-color 0.25s ease;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--stat-accent, var(--primary));
+    opacity: 0.7;
+    transition: opacity 0.25s;
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    background: linear-gradient(135deg, var(--primary-light), var(--gold-light));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: transparent;
+}
+
+.stat-card:active {
+    transform: translateY(-1px) scale(0.99);
+}
+
+.stat-card:hover::before { opacity: 1; }
+.stat-card:hover::after { opacity: 1; }
+
+/* Active/selected stat card — click a card to filter the table by that status */
+.stat-card.is-active {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: transparent;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface-muted) 100%);
+    outline: 2px solid var(--stat-accent, var(--primary));
+    outline-offset: -1px;
+}
+.stat-card.is-active::before { opacity: 1; height: 4px; }
+.stat-card.is-active::after { opacity: 1; }
+.stat-card.is-active .stat-icon { transform: scale(1.08) rotate(-4deg); }
+.stat-card .stat-check {
+    position: absolute;
+    top: 14px; right: 14px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--stat-accent, var(--primary));
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(.2,.7,.3,1);
+}
+.stat-card.is-active .stat-check { opacity: 1; transform: scale(1); }
+
+.stat-card[data-stat="total"] { --stat-accent: var(--primary); }
+.stat-card[data-stat="receiving"] { --stat-accent: #b45309; }
+.stat-card[data-stat="releasing"] { --stat-accent: #0369a1; }
+.stat-card[data-stat="check"] { --stat-accent: #6d28d9; }
+.stat-card[data-stat="completed"] { --stat-accent: #15803d; }
+
+.stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    margin-bottom: 16px;
+    transition: transform 0.25s cubic-bezier(.2,.7,.3,1);
+}
+
+.stat-card:hover .stat-icon {
+    transform: scale(1.08) rotate(-4deg);
+}
+
+.stat-icon.total {
+    background: linear-gradient(135deg, var(--accent-soft), #d5ede0);
+    color: var(--primary-dark);
+}
+
+.stat-icon.receiving {
+    background: linear-gradient(135deg, #fef3e2, #fbe4bd);
+    color: #92600f;
+}
+
+.stat-icon.releasing {
+    background: linear-gradient(135deg, #e0f2fe, #cbe8fb);
+    color: #0369a1;
+}
+
+.stat-icon.completed {
+    background: linear-gradient(135deg, #dcfce7, #c3f3d3);
+    color: #15803d;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 22px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: transform 0.22s cubic-bezier(.2,.7,.3,1), box-shadow 0.22s ease, filter 0.22s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+/* Diagonal shine that sweeps across the button on hover — pure CSS, no JS. */
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(115deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.55s cubic-bezier(.2,.7,.3,1);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.btn:hover::before {
+    left: 130%;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    filter: brightness(1.03);
+}
+
+.btn:active {
+    transform: translateY(0) scale(0.97);
+    box-shadow: none;
+    transition: transform 0.12s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #22c55e, var(--success));
+    color: white;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444, var(--danger));
+    color: white;
+}
+
+/* Table */
+.table-container {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+}
+
+.table-header {
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface-muted) 100%);
+    color: var(--ink-900);
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--border);
+}
+
+.table-row {
+    transition: background-color 0.15s ease;
+    font-size: 10px;
+}
+
+#recordsTable thead th {
+    font-size: 9px;
+}
+
+.table-row:hover {
+    background: var(--accent-soft);
+}
+
+.table-row td:first-child { position: relative; }
+
+.table-row:hover td:first-child::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--primary), var(--gold));
+    border-radius: 0 2px 2px 0;
+}
+
+/* Sortable table columns */
+#recordsTable thead th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s ease;
+}
+#recordsTable thead th.sortable:hover {
+    color: var(--primary-dark);
+}
+#recordsTable thead th.sortable .sort-icon {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 9px;
+    opacity: 0.35;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+#recordsTable thead th.sortable:hover .sort-icon { opacity: 0.7; }
+#recordsTable thead th.sortable.sort-asc .sort-icon,
+#recordsTable thead th.sortable.sort-desc .sort-icon {
+    opacity: 1;
+    color: var(--primary);
+}
+#recordsTable thead th.sortable.sort-desc .sort-icon { transform: rotate(180deg); }
+
+/* Active filter chip shown under the table header when a stat card is selected */
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 8px 5px 14px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--primary-dark);
+    font-size: 12.5px;
+    font-weight: 600;
+    animation: chipIn 0.2s cubic-bezier(.2,.7,.3,1);
+}
+.filter-chip button {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 107, 74, 0.12);
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+.filter-chip button:hover { background: rgba(15, 107, 74, 0.22); transform: rotate(90deg); }
+@keyframes chipIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+/* Skeleton loading rows — shown while the first fetch is in flight */
+.skeleton-bar {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--border-soft) 25%, var(--surface-muted) 50%, var(--border-soft) 75%);
+    background-size: 200% 100%;
+    animation: skeletonShine 1.4s ease-in-out infinite;
+}
+@keyframes skeletonShine {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Floating scroll-to-top button */
+.scroll-top-btn {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    border: 2px solid rgba(255,255,255,0.4);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px) scale(0.9);
+    transition: opacity 0.25s ease, transform 0.25s cubic-bezier(.2,.7,.3,1);
+    z-index: 30;
+}
+.scroll-top-btn.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+.scroll-top-btn:hover { transform: translateY(-3px) scale(1.05); }
+
+.action-btn {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+    background: var(--surface-muted);
+    color: var(--ink-500);
+}
+.action-btn:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.08);
+    box-shadow: var(--shadow-sm);
+}
+.action-btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.94);
+    transition: transform 0.1s ease;
+}
+.action-btn.is-done { opacity: 0.45; cursor: default; }
+.action-btn.is-disabled { opacity: 0.3; cursor: not-allowed; }
+
+.action-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 12px;
+    background: var(--surface-muted);
+    border: 1px solid var(--border-soft);
+}
+
+/* Status Pills */
+.status-pill {
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-pill i { font-size: 10px; }
+
+.status-pending {
+    background: #fef3e2;
+    color: #92400e;
+}
+
+.status-received {
+    background: #e0f2fe;
+    color: #1e40af;
+}
+
+.status-completed {
+    background: #dcfce7;
+    color: #065f46;
+}
+
+/* Modal */
+.modal-overlay {
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(6px);
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.3);
+    animation: modalSlideIn 0.25s cubic-bezier(.2,.8,.3,1);
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-16px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Create DV form — styled to mirror the printed Disbursement Voucher exactly:
+   bordered boxes with a small caption label, and borderless inputs inside
+   so it reads like the paper form rather than a generic web form. */
+.dv-paper {
+    font-family: 'Times New Roman', 'Tinos', Times, serif;
+    color: #000;
+    background: white;
+}
+
+/* A4 page frame for the on-screen Create DV form: sizes the visible sheet
+   to match one A4 page (210mm wide, at least 297mm tall) so it reads as a
+   physical page while being filled in. Unlike the PDF/print output (built
+   separately in buildDVHtml()/#pdfContent, which stays pixel-exact to the
+   official template), this editable copy is allowed to grow taller than
+   one page — see the tr/td rules below — so real typed text always has
+   room and never gets clipped or overlaps into a neighboring row. */
+.dv-a4-frame {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    overflow: visible;
+    position: relative;
+}
+.dv-a4-frame .dv-paper {
+    width: 210mm;
+    box-sizing: border-box;
+    transform-origin: top left;
+}
+
+/* The Create DV table is a direct copy of the original spreadsheet's row
+   heights, many only a few pixels tall — fine for a flat printout, but too
+   tight for a *live* editable field: a browser won't shrink real typed
+   text to fit an 8px row, so it bled up/down into the neighboring row.
+   Let any row that actually holds an input/textarea grow to whatever
+   height its text needs; purely decorative/spacer rows (with no field)
+   are left at their original tight height. Scoped to #dvPaperSheet only —
+   the separate PDF/print table is untouched and stays pixel-exact. */
+#dvPaperSheet table.dv-grid tr:has(.dv-cell-input) {
+    height: auto !important;
+}
+#dvPaperSheet table.dv-grid td:has(.dv-cell-input) {
+    height: auto !important;
+    padding: 3px 4px !important;
+}
+#dvPaperSheet .dv-cell-input {
+    height: auto !important;
+    min-height: 1.5em;
+    line-height: 1.35;
+    padding: 2px 0 !important;
+}
+#dvPaperSheet .dv-cell-textarea {
+    height: auto !important;
+    line-height: 1.35;
+}
+
+.dv-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: 'Times New Roman', 'Tinos', Times, serif;
+    font-size: 10pt;
+    padding: 0;
+    color: #000;
+}
+
+.dv-input:focus {
+    background: #fffbea;
+}
+
+textarea.dv-input {
+    resize: vertical;
+    min-height: 54px;
+}
+
+/* Exact-grid replica of the official DV template (Create DV form + PDF/print
+   output). Every td below carries its real column width/row height/border
+   weight/font copied from the source .xlsx, so the on-screen and printed
+   voucher match the official form cell-for-cell, not just approximately. */
+.dv-grid td { vertical-align: middle; }
+.dv-cell-input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: 'Times New Roman', 'Tinos', Times, serif;
+    font-size: inherit;
+    padding: 0;
+    color: #000;
+}
+.dv-cell-input:focus { background: #fffbea; }
+.dv-cell-textarea { resize: none; width: 100%; height: 100%; line-height: 1.3; }
+.dv-inline-input { width: 120px; display: inline-block; border-bottom: 1px solid #000; }
+
+/* Input Fields */
+.input-field {
+    width: 100%;
+    padding: 11px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    transition: all 0.18s ease;
+    background: var(--surface-muted);
+    color: var(--ink-900);
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(15, 107, 74, 0.12);
+}
+
+/* Search Bar */
+.search-container {
+    position: relative;
+}
+
+.search-input {
+    padding-left: 48px;
+    padding-right: 48px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-400);
+}
+
+.clear-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-400);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.clear-icon:hover {
+    color: var(--danger);
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.5s cubic-bezier(.2,.7,.3,1) both;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes rowIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.table-row {
+    animation: rowIn 0.35s cubic-bezier(.2,.7,.3,1) both;
+}
+/* Cascading stagger so a filter/sort/search swap reads as one smooth
+   transition instead of all rows popping in at once. Capped at 14 rows —
+   beyond that the extra delay isn't perceptible and just slows things down. */
+.table-row:nth-child(1) { animation-delay: 0.00s; }
+.table-row:nth-child(2) { animation-delay: 0.03s; }
+.table-row:nth-child(3) { animation-delay: 0.06s; }
+.table-row:nth-child(4) { animation-delay: 0.09s; }
+.table-row:nth-child(5) { animation-delay: 0.12s; }
+.table-row:nth-child(6) { animation-delay: 0.15s; }
+.table-row:nth-child(7) { animation-delay: 0.18s; }
+.table-row:nth-child(8) { animation-delay: 0.21s; }
+.table-row:nth-child(9) { animation-delay: 0.24s; }
+.table-row:nth-child(10) { animation-delay: 0.27s; }
+.table-row:nth-child(11) { animation-delay: 0.30s; }
+.table-row:nth-child(12) { animation-delay: 0.33s; }
+.table-row:nth-child(13) { animation-delay: 0.36s; }
+.table-row:nth-child(n+14) { animation-delay: 0.39s; }
+
+/* Smooth crossfade for the table body itself while a new filter/sort/search
+   result set is swapping in (toggled briefly in JS). */
+.table-container {
+    transition: opacity 0.15s ease;
+}
+.table-container.is-swapping {
+    opacity: 0.45;
+}
+
+/* Applied to a single row right after an optimistic update (mark received/
+   released, check received/released) so the eye catches exactly what just
+   changed instead of the whole table re-rendering. */
+@keyframes rowFlash {
+    0%, 55% { background-color: var(--accent-soft); }
+    100% { background-color: transparent; }
+}
+.row-flash { animation: rowFlash 1.2s ease; }
+
+/* Inline "required field" feedback on forms (New Voucher) — instant client-side
+   validation instead of a silent no-op or a round trip to discover the mistake. */
+.input-field.field-invalid, .field-invalid {
+    border-color: var(--danger);
+    background: #fef2f2;
+    animation: fieldShake 0.4s ease;
+}
+@keyframes fieldShake {
+    10%, 90% { transform: translateX(-1px); }
+    20%, 80% { transform: translateX(2px); }
+    30%, 50%, 70% { transform: translateX(-3px); }
+    40%, 60% { transform: translateX(3px); }
+}
+
+/* Toasts */
+#toastStack {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.toast {
+    pointer-events: auto;
+    min-width: 260px;
+    max-width: 360px;
+    background: white;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    border-left: 4px solid var(--primary);
+    padding: 13px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13.5px;
+    color: var(--ink-900);
+    font-weight: 500;
+    animation: toastIn 0.3s cubic-bezier(.2,.8,.3,1);
+}
+
+.toast.error { border-left-color: var(--danger); }
+.toast.success { border-left-color: var(--success); }
+.toast i { margin-top: 1px; }
+.toast.success i { color: var(--success); }
+.toast.error i { color: var(--danger); }
+.toast.info i { color: var(--info); }
+
+.toast.leaving {
+    animation: toastOut 0.25s ease forwards;
+}
+
+@keyframes toastIn {
+    from { opacity: 0; transform: translateX(24px) scale(0.96); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes toastOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(24px); }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Native browser printing (Ctrl+P), as a fallback to the Export PDF button
+   (which renders via jsPDF at format:'a4' — see exportPDF()). Everything
+   except the voucher paper is hidden so the printout is just the form.
+   Margin: Excel's "Narrow" preset (0.75in top/bottom, 0.25in left/right),
+   matching exportPDF() and .dv-page-frame below so Preview, Download PDF,
+   and Print all look the same.
+   @page margin is 0 because some browsers ignore @page's own margin
+   depending on the print dialog's "Margins" setting, falling back to a much
+   larger default; #pdfContent is positioned at the exact margin offset
+   instead so it's never at the mercy of that setting. The sheet keeps its
+   natural 210mm design width — fitPdfContentToPage() below stretches it to
+   exactly fill the margin box on both axes just before printing, so it
+   always lands on one page with no clipping and no extra blank border. */
+@page {
+    size: A4;
+    margin: 0;
+}
+@media print {
+    body * { visibility: hidden; }
+    #pdfContent, #pdfContent * { visibility: visible; }
+    #pdfContent {
+        /* !important overrides #pdfContent's own inline position:relative
+           (set in buildDVHtml()) — an inline style otherwise beats this
+           rule regardless of specificity, leaving the element in normal
+           flow instead of at the offset below. */
+        position: absolute !important;
+        left: 6.35mm; /* 0.25in */
+        top: 19.05mm; /* 0.75in */
+        box-shadow: none;
+        border: none;
+        transform-origin: top left;
+    }
+    /* .dv-page-frame only exists to frame the paper for on-screen Preview;
+       it must contribute no box of its own to the print output. */
+    .dv-page-frame {
+        all: unset;
+        display: contents;
+    }
+}
+
+/* Frames #pdfContent in the Preview modal with the same margin as Download
+   PDF and Print above, so what's shown on-screen is a true WYSIWYG. */
+.dv-page-frame {
+    width: 210mm;
+    min-height: 297mm;
+    box-sizing: border-box;
+    padding: 0.75in 0.25in;
+    background: var(--surface-muted);
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+}
+.dv-page-frame > #pdfContent {
+    box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+}
+
+/* NOTE: an older, unused set of DV styles (a second .dv-paper/.dv-input
+   definition plus dv-qr-corner, dv-qr-inline, dv-logo-left/right, dv-row,
+   dv-cell, dv-label, dv-textarea, dv-checkline) used to live here. It was
+   left over from a pre-grid version of this form, was never referenced by
+   any markup, and its duplicate .dv-paper/.dv-input rules were silently
+   overriding the real definitions above (forcing a fixed 210mm width and a
+   9.5pt font onto the live Create DV grid), which is what broke the
+   layout/alignment. Removed. */
+.dv-mode-radio {
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    width: 10px; height: 10px; margin: 0; padding: 0;
+    border: 1px solid #000; border-radius: 0;
+    background: #fff; position: relative; display: inline-block;
+    vertical-align: middle; box-sizing: border-box;
+}
+.dv-mode-radio:checked::after {
+    content: ''; position: absolute; left: 1px; top: 1px; right: 1px; bottom: 1px; background: #000;
+}
